@@ -1,6 +1,38 @@
 # Chapter 02 - Breaking Down Genetic Algorithms
 
+The first broad thesis of this chapter is that there exists a general framework
+for genetic algorithms:
+
+1. Initialize the population
+2. Evaluate the population
+3. Select Parents
+4. Generate children
+5. Mutate children
+
+These steps will always be performed in this order.
+
+This means we can inject dependencies for the following:
+
++ A function that generates the initial population (more specifically, a
+  function that generates a single member of the initial population).
++ A function for evaluating fitness of a given chromosome
++ A function for generating children (given 2 parents)
++ A function for mutating a given child
+
 ## The Genetics Metaphor
+
+### Chromosomes
+
+Each element of a population is a "chromosome". Each chromosome is a bit of data
+representing one possible solution.
+
+### Population Size
+
+Larger populations might converge on a solution faster. Smaller populations are
+quicker to work with (as each pass through simply takes less time).
+
+The author's contention here is that pretty much any population size can work,
+and that 100 is a fine starting number.
 
 ## Suitability of Elixir
 
