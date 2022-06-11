@@ -34,19 +34,26 @@ quicker to work with (as each pass through simply takes less time).
 The author's contention here is that pretty much any population size can work,
 and that 100 is a fine starting number.
 
-## Suitability of Elixir
+I tried it with an initial population of 1000, and it seemed to plateau for a
+much longer time (with the one-max problem). I couldn't tell if this is because
+each iteration step just took longer, or if it was stalled for more steps.
 
-The author contends that Elixir is an ideal language for this type of work,
-mostly because we're already in the habit of writing functions that take some
-data and return some data (rather than writing objects that do stuff to
-themselves). In that sense, I suspect any functional language would be well
-suited, though Elixir certainly has very pleasant ergonomics.
-
-The author does not touch on this in Chapter 1 that I recall, but I'd suspect
-that the ability to do things like `pmap` (and otherwise leverage concurrency
-and the BEAM) also make it uniquely suited to this type of work relative to a
-single-threaded language. Similarly, Elixir's ability to call other processes
-(e.g. with NIFs), utilities, executables, etc. seems like it'll come into play,
-though I'd bet that's outside the scope of what the book offers.
+Trying with a very small population converged very quickly on a poor solution.
 
 ## Questions I Have
+
+We still have the genetic metaphor. Where does it break down?
+
+Right now the crossover and mutate functions are closely tied to the one-max
+problem (and more generally to lists as the data structure for a chromosome).
+I'm curious whether that crossover changes if our chromosomes are structs (for
+example), and if so, how?
+
+There seem to be additional opportunities to make our Elixir code better.
+Notably, something like parallel map for evaluation.
+
+I'm curious whether there are cases where we'll want to reason about the entire
+population at each step, rather than just checking to see if something has
+bubbled to the top?
+
+What happens if nothing converges to maximum fitness?
