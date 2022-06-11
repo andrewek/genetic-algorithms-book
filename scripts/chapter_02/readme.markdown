@@ -57,3 +57,6 @@ population at each step, rather than just checking to see if something has
 bubbled to the top?
 
 What happens if nothing converges to maximum fitness?
+
+We pass the `genotype_fn` through beyond creating the initial population. Why do
+we do this?
