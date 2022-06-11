@@ -3,27 +3,32 @@ defmodule Genetic do
   Basic framework for the Genetic Algorithm
   """
 
+  alias Types.Chromosome
+
   @doc """
   Entrypoint
   """
-  def run(fitness_fn, genotype_fn, max_fitness, opts \\ []) do
-    population = initialize(genotype_fn, opts)
+  def run(problem, opts \\ []) do
+    population = initialize(&problem.genotype_fn/0, opts)
 
     population
-    |> evolve(fitness_fn, genotype_fn, max_fitness, opts)
+    |> evolve(problem, opts)
   end
 
   @doc """
   Combine parents to make new children
   """
-  def crossover(population, opts) do
+  def crossover(population, _opts) do
     Enum.reduce(population, [], fn({parent_1, parent_2}, acc) ->
-      split_point = :rand.uniform(length(parent_1))
+      split_point = :rand.uniform(length(parent_1.genes))
 
-      {{h1, t1}, {h2, t2}} = {Enum.split(parent_1, split_point), Enum.split(parent_2, split_point)}
+      {{h1, t1}, {h2, t2}} = {Enum.split(parent_1.genes, split_point), Enum.split(parent_2.genes, split_point)}
 
-      child_1 = h1 ++ t2
-      child_2 = h2 ++ t1
+      child_1_genes = h1 ++ t2
+      child_2_genes = h2 ++ t1
+
+      child_1 = %Chromosome{parent_1 | genes: child_1_genes}
+      child_2 = %Chromosome{parent_2 | genes: child_2_genes}
 
       [child_1, child_2 | acc]
     end)
@@ -35,27 +40,32 @@ defmodule Genetic do
   """
   def evaluate(population, fitness_fn, opts) do
     population
-    |> Enum.sort_by(fitness_fn, &>=/2)
+    |> Enum.map(fn(chromosome) ->
+      fitness = fitness_fn.(chromosome)
+      age = chromosome.age + 1
+      %Chromosome{chromosome | fitness: fitness, age: age}
+    end)
+    |> Enum.sort_by(& &1.fitness, &>=/2)
   end
 
   @doc """
   Do the steps!
   """
-  def evolve(population, fitness_fn, genotype_fn, max_fitness, opts) do
-    population = evaluate(population, fitness_fn, opts)
+  def evolve(population, problem, opts) do
+    population = evaluate(population, &problem.fitness_fn/1, opts)
 
     best = hd(population)
 
-    IO.puts("Current best: #{fitness_fn.(best)}")
+    IO.puts("Current best: #{best.fitness}")
 
-    if fitness_fn.(best) == max_fitness do
+    if problem.terminate?(population) do
       best
     else
       population
       |> select(opts)
       |> crossover(opts)
       |> mutation(opts)
-      |> evolve(fitness_fn, genotype_fn, max_fitness, opts)
+      |> evolve(problem, opts)
     end
   end
 
@@ -74,7 +84,7 @@ defmodule Genetic do
   def mutation(population, opts) do
     Enum.map(population, fn(chromosome) ->
       if :rand.uniform() < 0.05 do
-        Enum.shuffle(chromosome)
+        %Chromosome{chromosome | genes: Enum.shuffle(chromosome.genes)}
       else
         chromosome
       end
